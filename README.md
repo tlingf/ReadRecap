@@ -1,6 +1,6 @@
-This Chrome extension reminds you of articles you have read (spend 3+ minutes on), and allows you to add synopses son you can review them later (more functionality to add around that).
+This Chrome extension reminds you of articles you have read (spent 3+ minutes on), and allows you to add recaps so you can review them later (more functionality to add around that).
 
-This tries to filter to articles and blogs (also showing github pages for now)
+This tries to filter to articles, blogs, and podcasts (also showing github pages for now)
 
 <img width="720" alt="image" src="https://github.com/user-attachments/assets/b650fc3c-2fc8-4c2c-896e-156db4621ffb">
 
