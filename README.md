@@ -2,7 +2,7 @@ This Chrome extension reminds you of articles you have read (spent 3+ minutes on
 
 This tries to filter to articles, blogs, and podcasts (also showing github pages for now)
 
-<img width="720" alt="image" src="https://github.com/user-attachments/assets/b650fc3c-2fc8-4c2c-896e-156db4621ffb">
+<img width="661" alt="image" src="https://github.com/user-attachments/assets/1b223139-516b-4130-92f5-9ded23cd5526">
 
 
 To run:
