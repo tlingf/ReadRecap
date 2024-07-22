@@ -1,4 +1,4 @@
-// import { isArticle } from 'utils.js';
+import { isArticle } from './utils.js';
 
 const MINIMUM_TIME = 3 * 60 * 1000; // 3 minutes in milliseconds
 
@@ -15,20 +15,6 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   }
   return true;
 });
-
-function isArticle(url, title) {
-  const lowercaseUrl = url.toLowerCase();
-  const lowercaseTitle = title.toLowerCase();
-
-  // Exclude certain types of pages
-  if (lowercaseUrl.includes('google.com/search') || lowercaseUrl.includes('youtube.com')) {
-    return false;
-  }
-
-  // Include pages with article-like keywords in URL or title
-  const articleKeywords = ['article', 'post', 'blog', 'news', 'story', 'feature'];
-  return articleKeywords.some(keyword => lowercaseUrl.includes(keyword) || lowercaseTitle.includes(keyword));
-}
 
 async function analyzeHistory() {
     console.log("Analyzing history...");

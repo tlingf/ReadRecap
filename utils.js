@@ -1,8 +1,20 @@
-// utils.js
-
 export function isArticle(url, title) {
   const lowercaseUrl = url.toLowerCase();
   const lowercaseTitle = title.toLowerCase();
+
+  // Parse the URL
+  let parsedUrl;
+  try {
+    parsedUrl = new URL(url);
+  } catch (e) {
+    console.error("Invalid URL:", url);
+    return false;
+  }
+
+  // Check if it's just the base domain
+  if (parsedUrl.pathname === "/" || parsedUrl.pathname === "") {
+    return false;
+  }
 
   // Explicitly exclude Google Colab URLs
   if (lowercaseUrl.includes('colab.research.google.com')) return false;
