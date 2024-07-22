@@ -1,0 +1,19 @@
+{
+  "name": "read-recap",
+  "version": "1.0.0",
+  "description": "Chrome extension to recap significant articles from browsing history",
+  "scripts": {
+    "test": "jest",
+    "build": "webpack --mode production",
+    "dev": "webpack --mode development --watch"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.14.0",
+    "@babel/preset-env": "^7.14.0",
+    "babel-jest": "^26.6.3",
+    "jest": "^26.6.3",
+    "webpack": "^5.36.2",
+    "webpack-cli": "^4.6.0",
+    "copy-webpack-plugin": "^8.1.1"
+  }
+}
