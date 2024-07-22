@@ -12,7 +12,7 @@ export function isArticle(url, title) {
   }
 
   // Check if it's just the base domain
-  if (parsedUrl.pathname === "/" || parsedUrl.pathname === "") {
+  if (parsedUrl.pathname === "/" || parsedUrl.pathname === "" || parsedUrl.pathname.endsWith("home")) {
     return false;
   }
 
@@ -38,7 +38,7 @@ export function isArticle(url, title) {
   if (lowercaseUrl.includes('wordpress.com') || lowercaseUrl.includes('blogspot.com')) return true;
 
   // GitHub README files or documentation
-  if (lowercaseUrl.includes('github.com') && (lowercaseUrl.includes('readme') || lowercaseUrl.includes('/docs/'))) return true;
+  if (lowercaseUrl.includes('github.com') && (lowercaseUrl.includes('readme') || lowercaseUrl.includes('/docs/'))) return false;
 
   // Scientific papers (common domains)
   if (lowercaseUrl.includes('arxiv.org') || lowercaseUrl.includes('researchgate.net') || lowercaseUrl.includes('sciencedirect.com')) return true;

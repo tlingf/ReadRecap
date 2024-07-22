@@ -16,13 +16,23 @@ document.addEventListener('DOMContentLoaded', function() {
         Object.entries(groupedArticles).forEach(([date, articles]) => {
           const dateHeader = document.createElement('h2');
           dateHeader.textContent = date;
+          dateHeader.className = 'mt-4 mb-3';
           synopsisContent.appendChild(dateHeader);
   
           articles.forEach(function(article) {
             const articleDiv = document.createElement('div');
+            articleDiv.className = 'row article-row';
             articleDiv.innerHTML = `
-              <h3><a href="${article.url}" target="_blank">${article.title}</a> (${article.timeSpent})</h3>
-              <textarea id="synopsis-${article.url}" rows="4" cols="50" placeholder="Write your synopsis here..."></textarea>
+              <div class="col-md-6">
+                <h3>
+                  <a href="${article.url}" target="_blank">${article.title}</a> 
+                  <small class="text-muted">(${article.domain})</small>
+                </h3>
+                <p>${article.timeSpent}</p>
+              </div>
+              <div class="col-md-6">
+                <textarea id="synopsis-${article.url}" class="form-control" rows="4" placeholder="Write your synopsis here..."></textarea>
+              </div>
             `;
             synopsisContent.appendChild(articleDiv);
   
@@ -52,7 +62,7 @@ document.addEventListener('DOMContentLoaded', function() {
   function exportData() {
     chrome.storage.local.get(null, (result) => {
       const groupedArticles = result.groupedArticles || {};
-      let csvContent = "Date,Title,URL,Time Spent,Synopsis\n";
+      let csvContent = "Date,Title,URL,Domain,Time Spent,Synopsis\n";
   
       Object.entries(groupedArticles).forEach(([date, articles]) => {
         articles.forEach(article => {
@@ -61,6 +71,7 @@ document.addEventListener('DOMContentLoaded', function() {
             date,
             article.title.replace(/"/g, '""'),
             article.url,
+            article.domain,
             article.timeSpent,
             synopsis.replace(/"/g, '""')
           ];

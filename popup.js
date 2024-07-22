@@ -7,24 +7,33 @@ document.addEventListener('DOMContentLoaded', function() {
   
   function displayArticles() {
     const articleList = document.getElementById('articleList');
-    articleList.innerHTML = 'Loading...';
+    articleList.innerHTML = '<div class="spinner-border" role="status"><span class="visually-hidden">Loading...</span></div>';
     
     chrome.storage.local.get(['groupedArticles'], function(result) {
       const groupedArticles = result.groupedArticles || {};
       
       if (Object.keys(groupedArticles).length === 0) {
-        articleList.innerHTML = 'No significant articles found. Try running debug.';
+        articleList.innerHTML = '<div class="alert alert-info">No significant articles found. Try running debug.</div>';
       } else {
         articleList.innerHTML = '';
         Object.entries(groupedArticles).forEach(([date, articles]) => {
           const dateHeader = document.createElement('h2');
+          dateHeader.className = 'h6 mt-3 mb-2';
           dateHeader.textContent = date;
           articleList.appendChild(dateHeader);
   
           const ul = document.createElement('ul');
+          ul.className = 'list-group';
           articles.forEach(function(article) {
             const li = document.createElement('li');
-            li.innerHTML = `<a href="${article.url}" target="_blank">${article.title}</a> (${article.timeSpent})`;
+            li.className = 'list-group-item';
+            li.innerHTML = `
+              <a href="${article.url}" target="_blank" class="text-truncate d-inline-block" style="max-width: 200px;">
+                ${article.title}
+              </a>
+              <small class="text-muted d-block">${article.domain}</small>
+              <span class="badge bg-secondary float-end">${article.timeSpent}</span>
+            `;
             ul.appendChild(li);
           });
           articleList.appendChild(ul);

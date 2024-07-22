@@ -43,28 +43,30 @@ async function analyzeHistory() {
     }
   }
 
-async function processHistoryItems(historyItems) {
-  const significantArticles = [];
-  const seenUrls = new Set();
-
-  for (const item of historyItems) {
-    if (isArticle(item.url, item.title) && !seenUrls.has(item.url)) {
-      seenUrls.add(item.url);
-      const visits = await chrome.history.getVisits({url: item.url});
-      
-      if (visits.length > 1) {
-        const timeSpent = visits[visits.length - 1].visitTime - visits[0].visitTime;
-        if (timeSpent >= MINIMUM_TIME) {
-          significantArticles.push({
-            url: item.url,
-            title: item.title,
-            lastVisit: new Date(item.lastVisitTime),
-            timeSpent: formatTime(Math.round(timeSpent / 60000))
-          });
+  async function processHistoryItems(historyItems) {
+    const significantArticles = [];
+    const seenUrls = new Set();
+  
+    for (const item of historyItems) {
+      if (isArticle(item.url, item.title) && !seenUrls.has(item.url)) {
+        seenUrls.add(item.url);
+        const visits = await chrome.history.getVisits({url: item.url});
+        
+        if (visits.length > 1) {
+          const timeSpent = visits[visits.length - 1].visitTime - visits[0].visitTime;
+          if (timeSpent >= MINIMUM_TIME) {
+            const domain = new URL(item.url).hostname.replace('www.', '');
+            significantArticles.push({
+              url: item.url,
+              title: item.title,
+              domain: domain,
+              lastVisit: new Date(item.lastVisitTime),
+              timeSpent: formatTime(Math.round(timeSpent / 60000))
+            });
+          }
         }
       }
     }
-  }
 
   return significantArticles;
 }
@@ -84,7 +86,7 @@ function groupArticlesByDate(articles) {
 }
 
 function formatTime(minutes) {
-  return minutes >= 60 ? "60+ minutes" : `${minutes} minutes`;
+  return minutes >= 60 ? "60+ min" : `${minutes} min`;
 }
 
 // Run analysis periodically
