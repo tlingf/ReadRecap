@@ -1,7 +1,5 @@
-import { isArticle, formatTime } from '../utils/articleUtils';
-import { saveGroupedArticles } from '../storage/storageManager';
+// import { isArticle } from 'utils.js';
 
-const MINIMUM_VISITS = 2;
 const MINIMUM_TIME = 3 * 60 * 1000; // 3 minutes in milliseconds
 
 chrome.runtime.onInstalled.addListener(() => {
@@ -18,8 +16,22 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   return true;
 });
 
+function isArticle(url, title) {
+  const lowercaseUrl = url.toLowerCase();
+  const lowercaseTitle = title.toLowerCase();
+
+  // Exclude certain types of pages
+  if (lowercaseUrl.includes('google.com/search') || lowercaseUrl.includes('youtube.com')) {
+    return false;
+  }
+
+  // Include pages with article-like keywords in URL or title
+  const articleKeywords = ['article', 'post', 'blog', 'news', 'story', 'feature'];
+  return articleKeywords.some(keyword => lowercaseUrl.includes(keyword) || lowercaseTitle.includes(keyword));
+}
+
 async function analyzeHistory() {
-  console.log("Starting history analysis.");
+  console.log("Analyzing history...");
   const oneWeekAgo = new Date().getTime() - 7 * 24 * 60 * 60 * 1000;
   
   try {
@@ -32,15 +44,12 @@ async function analyzeHistory() {
     console.log(`Found ${historyItems.length} history items.`);
     const significantArticles = await processHistoryItems(historyItems);
 
-    // Sort articles by last visit date (most recent first)
-    significantArticles.sort((a, b) => b.lastVisit - a.lastVisit);
-
     // Group articles by date
     const groupedArticles = groupArticlesByDate(significantArticles);
 
-    console.log(`Analysis complete. Found ${significantArticles.length} significant articles.`);
-    await saveGroupedArticles(groupedArticles);
-    console.log("Saved grouped articles to storage.");
+    // Save to storage
+    await chrome.storage.local.set({ groupedArticles: groupedArticles });
+    console.log("Analysis complete. Saved grouped articles to storage.");
   } catch (error) {
     console.error("Error during history analysis:", error);
   }
@@ -53,31 +62,18 @@ async function processHistoryItems(historyItems) {
   for (const item of historyItems) {
     if (isArticle(item.url, item.title) && !seenUrls.has(item.url)) {
       seenUrls.add(item.url);
-      console.log(`Analyzing article: ${item.url}, Visit count: ${item.visitCount}`);
+      const visits = await chrome.history.getVisits({url: item.url});
       
-      let timeSpent = "";
-      if (item.visitCount >= MINIMUM_VISITS) {
-        timeSpent = "Multiple visits";
-      } else {
-        const visits = await chrome.history.getVisits({url: item.url});
-        
-        if (visits.length > 1) {
-          const calculatedTime = visits[visits.length - 1].visitTime - visits[visits.length - 2].visitTime;
-          console.log(`Time spent on ${item.url}: ${calculatedTime}ms`);
-          if (calculatedTime >= MINIMUM_TIME) {
-            timeSpent = formatTime(Math.round(calculatedTime / 60000));
-          }
+      if (visits.length > 1) {
+        const timeSpent = visits[visits.length - 1].visitTime - visits[0].visitTime;
+        if (timeSpent >= MINIMUM_TIME) {
+          significantArticles.push({
+            url: item.url,
+            title: item.title,
+            lastVisit: new Date(item.lastVisitTime),
+            timeSpent: formatTime(Math.round(timeSpent / 60000))
+          });
         }
-      }
-
-      if (timeSpent) {
-        significantArticles.push({
-          url: item.url,
-          title: item.title,
-          visits: item.visitCount,
-          lastVisit: new Date(item.lastVisitTime),
-          timeSpent: timeSpent
-        });
       }
     }
   }
@@ -97,6 +93,10 @@ function groupArticlesByDate(articles) {
     });
     return groups;
   }, {});
+}
+
+function formatTime(minutes) {
+  return minutes >= 60 ? "60+ minutes" : `${minutes} minutes`;
 }
 
 // Run analysis periodically
