@@ -59,10 +59,10 @@ document.addEventListener('DOMContentLoaded', function() {
           const synopsis = result[`synopsis_${article.url}`] || '';
           const row = [
             date,
-            article.title.replace(/"/g, '""'), // Escape quotes in the title
+            article.title.replace(/"/g, '""'),
             article.url,
             article.timeSpent,
-            synopsis.replace(/"/g, '""') // Escape quotes in the synopsis
+            synopsis.replace(/"/g, '""')
           ];
           csvContent += '"' + row.join('","') + '"\n';
         });

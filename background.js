@@ -31,29 +31,31 @@ function isArticle(url, title) {
 }
 
 async function analyzeHistory() {
-  console.log("Analyzing history...");
-  const oneWeekAgo = new Date().getTime() - 7 * 24 * 60 * 60 * 1000;
+    console.log("Analyzing history...");
+    const oneWeekAgo = new Date().getTime() - 7 * 24 * 60 * 60 * 1000;
+    
+    try {
+      const historyItems = await chrome.history.search({
+        text: '',
+        startTime: oneWeekAgo,
+        maxResults: 1000
+      });
   
-  try {
-    const historyItems = await chrome.history.search({
-      text: '',
-      startTime: oneWeekAgo,
-      maxResults: 1000
-    });
-
-    console.log(`Found ${historyItems.length} history items.`);
-    const significantArticles = await processHistoryItems(historyItems);
-
-    // Group articles by date
-    const groupedArticles = groupArticlesByDate(significantArticles);
-
-    // Save to storage
-    await chrome.storage.local.set({ groupedArticles: groupedArticles });
-    console.log("Analysis complete. Saved grouped articles to storage.");
-  } catch (error) {
-    console.error("Error during history analysis:", error);
+      console.log(`Found ${historyItems.length} history items.`);
+      const significantArticles = await processHistoryItems(historyItems);
+  
+      // Group articles by date
+      const groupedArticles = groupArticlesByDate(significantArticles);
+  
+      console.log("Grouped articles:", groupedArticles);
+  
+      // Save to storage
+      await chrome.storage.local.set({ groupedArticles: groupedArticles });
+      console.log("Analysis complete. Saved grouped articles to storage.");
+    } catch (error) {
+      console.error("Error during history analysis:", error);
+    }
   }
-}
 
 async function processHistoryItems(historyItems) {
   const significantArticles = [];
