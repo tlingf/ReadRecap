@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "Read Recap",
+  "name": "Recap your Reads",
   "version": "1.0",
-  "description": "Recaps significant articles and allows writing synopses",
+  "description": "Shows you articles read and allows you to recap them",
   "permissions": [
     "history",
     "storage",
