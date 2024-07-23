@@ -19,6 +19,7 @@ function setupDateInputs() {
 }
 
 function applyFilters() {
+  displayedArticles = 0;
   loadAndDisplaySynopsis();
 }
 
@@ -34,7 +35,6 @@ function loadAndDisplaySynopsis() {
     endDate: endDate
   }, function(response) {
     allArticles = response.articles;
-    displayedArticles = 0;
     updateStats(response.stats);
     displaySynopsis();
   });
@@ -43,27 +43,15 @@ function loadAndDisplaySynopsis() {
 function updateStats(stats) {
   document.getElementById('articleCount').textContent = `Articles found: ${stats.articleCount}`;
   document.getElementById('timePeriod').textContent = `Time period: ${new Date(stats.startDate).toLocaleDateString()} - ${new Date(stats.endDate).toLocaleDateString()}`;
-  document.getElementById('recapCount').textContent = `Recaps added: ${stats.recapCount}`;
+  document.getElementById('recapCount').textContent = `Recaps written: ${stats.recapCount}`;
 }
 
 function displaySynopsis() {
   const synopsisContent = document.getElementById('synopsisContent');
-  synopsisContent.innerHTML = '';
-
   const articlesToDisplay = allArticles.slice(displayedArticles, displayedArticles + articlesPerPage);
   displayedArticles += articlesToDisplay.length;
 
-  let currentDate = null;
-
   articlesToDisplay.forEach(function(article) {
-    if (article.date !== currentDate) {
-      currentDate = article.date;
-      const dateHeader = document.createElement('h2');
-      dateHeader.textContent = currentDate;
-      dateHeader.className = 'mt-4 mb-3';
-      synopsisContent.appendChild(dateHeader);
-    }
-
     const articleDiv = document.createElement('div');
     articleDiv.className = 'row article-row align-items-center';
     articleDiv.innerHTML = `
@@ -72,7 +60,10 @@ function displaySynopsis() {
           <a href="${article.url}" target="_blank">${article.title}</a>
         </h3>
         <p class="mb-1"><small class="text-muted">${article.domain}</small></p>
-        <p class="mb-0"><span class="badge bg-secondary">${article.timeSpent}</span></p>
+        <p class="mb-0">
+          <span class="badge bg-secondary">${article.timeSpent}</span>
+          <small class="text-muted ml-2">Last read: ${new Date(article.lastVisit).toLocaleString()}</small>
+        </p>
       </div>
       <div class="col-md-6">
         <textarea id="synopsis-${article.url}" class="form-control" rows="3" placeholder="Write your synopsis here..."></textarea>
@@ -85,7 +76,7 @@ function displaySynopsis() {
     loadSynopsis(article.url, textarea);
   });
 
-  document.getElementById('loadMoreBtn').classList.toggle('d-none', displayedArticles >= allArticles.length);
+  document.getElementById('loadMoreBtn').disabled = displayedArticles >= allArticles.length;
 }
 
 function loadMoreArticles() {
@@ -110,7 +101,7 @@ function loadSynopsis(url, textarea) {
 function updateRecapCount() {
   chrome.storage.local.get(null, (result) => {
     const recapCount = Object.keys(result).filter(key => key.startsWith('synopsis_') && result[key].trim() !== '').length;
-    document.getElementById('recapCount').textContent = `Recaps added: ${recapCount}`;
+    document.getElementById('recapCount').textContent = `Recaps written: ${recapCount}`;
   });
 }
 

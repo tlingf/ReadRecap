@@ -18,22 +18,11 @@
       color: #2c3e50;
       margin-bottom: 1.5rem;
     }
-    h2 {
-      font-size: 1.8rem;
-      font-weight: 400;
-      color: #34495e;
-      border-bottom: 2px solid #3498db;
-      padding-bottom: 0.5rem;
-    }
-    h3 {
-      font-size: 1.2rem;
-      font-weight: 400;
-    }
-    #exportButton { 
-      position: fixed; 
-      top: 20px; 
-      right: 20px;
-      z-index: 1000;
+    #statsContainer {
+      background-color: #e8f4f8;
+      border-radius: 8px;
+      padding: 1rem;
+      margin-bottom: 1rem;
     }
     .article-row {
       background-color: #ffffff;
@@ -58,41 +47,49 @@
       border-color: #3498db;
       box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
     }
-    #statsContainer {
-      background-color: #e8f4f8;
-      border-radius: 8px;
-      padding: 1rem;
-      margin-bottom: 1rem;
-    }
-    #loadMoreBtn {
-      margin-top: 1rem;
-    }
   </style>
 </head>
 <body class="container-fluid py-4">
   <h1>Recap your Reads</h1>
   <div id="statsContainer" class="mb-4">
-    <h2>Stats</h2>
-    <p id="articleCount">Articles found: Loading...</p>
-    <p id="timePeriod">Time period: Loading...</p>
-    <p id="recapCount">Recaps added: Loading...</p>
-    <div class="mb-3">
-      <label for="minTimeInput" class="form-label">Minimum time spent (minutes):</label>
-      <input type="number" id="minTimeInput" class="form-control" value="3" min="1">
+    <div class="row mb-3">
+      <div class="col-md-4">
+        <span id="articleCount">Articles found: Loading...</span>
+      </div>
+      <div class="col-md-4">
+        <span id="recapCount">Recaps written: Loading...</span>
+      </div>
+      <div class="col-md-4">
+        <span id="timePeriod">Time period: Loading...</span>
+      </div>
     </div>
-    <div class="mb-3">
-      <label for="startDate" class="form-label">Start Date:</label>
-      <input type="date" id="startDate" class="form-control">
+    <div class="row mb-3">
+      <div class="col-md-3">
+        <label for="minTimeInput" class="form-label">Min time (minutes):</label>
+        <input type="number" id="minTimeInput" class="form-control" value="3" min="1">
+      </div>
+      <div class="col-md-3">
+        <label for="startDate" class="form-label">Start Date:</label>
+        <input type="date" id="startDate" class="form-control">
+      </div>
+      <div class="col-md-3">
+        <label for="endDate" class="form-label">End Date:</label>
+        <input type="date" id="endDate" class="form-control">
+      </div>
+      <div class="col-md-3 d-flex align-items-end">
+        <button id="applyFilters" class="btn btn-primary">Apply Filters</button>
+      </div>
     </div>
-    <div class="mb-3">
-      <label for="endDate" class="form-label">End Date:</label>
-      <input type="date" id="endDate" class="form-control">
-    </div>
-    <button id="applyFilters" class="btn btn-primary">Apply Filters</button>
   </div>
-  <button id="exportButton" class="btn btn-secondary">Export Data</button>
+  <div class="row mb-3">
+    <div class="col-md-4">
+      <button id="exportButton" class="btn btn-secondary">Export Data</button>
+    </div>
+    <div class="col-md-4">
+      <button id="loadMoreBtn" class="btn btn-primary">Load More</button>
+    </div>
+  </div>
   <div id="synopsisContent" class="mt-4">Loading...</div>
-  <button id="loadMoreBtn" class="btn btn-primary d-none">Load More</button>
   <script src="synopsis.js"></script>
 </body>
 </html>
