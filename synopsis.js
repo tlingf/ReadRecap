@@ -1,64 +1,101 @@
+let allArticles = [];
+let displayedArticles = 0;
+const articlesPerPage = 10;
+
 document.addEventListener('DOMContentLoaded', function() {
-  displaySynopsis();
+  setupDateInputs();
   document.getElementById('exportButton').addEventListener('click', exportData);
+  document.getElementById('applyFilters').addEventListener('click', applyFilters);
+  document.getElementById('loadMoreBtn').addEventListener('click', loadMoreArticles);
+  loadAndDisplaySynopsis();
 });
+
+function setupDateInputs() {
+  const today = new Date();
+  const oneWeekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+  
+  document.getElementById('startDate').valueAsDate = oneWeekAgo;
+  document.getElementById('endDate').valueAsDate = today;
+}
+
+function applyFilters() {
+  loadAndDisplaySynopsis();
+}
+
+function loadAndDisplaySynopsis() {
+  const minTime = document.getElementById('minTimeInput').value * 60 * 1000; // Convert to milliseconds
+  const startDate = new Date(document.getElementById('startDate').value).getTime();
+  const endDate = new Date(document.getElementById('endDate').value).getTime() + 86400000; // Add one day to include the end date
+
+  chrome.runtime.sendMessage({
+    action: "getFilteredArticles",
+    minTime: minTime,
+    startDate: startDate,
+    endDate: endDate
+  }, function(response) {
+    allArticles = response.articles;
+    displayedArticles = 0;
+    updateStats(response.stats);
+    displaySynopsis();
+  });
+}
+
+function updateStats(stats) {
+  document.getElementById('articleCount').textContent = `Articles found: ${stats.articleCount}`;
+  document.getElementById('timePeriod').textContent = `Time period: ${new Date(stats.startDate).toLocaleDateString()} - ${new Date(stats.endDate).toLocaleDateString()}`;
+  document.getElementById('recapCount').textContent = `Recaps added: ${stats.recapCount}`;
+}
 
 function displaySynopsis() {
   const synopsisContent = document.getElementById('synopsisContent');
-  
-  chrome.storage.local.get(['groupedArticles'], function(result) {
-    const groupedArticles = result.groupedArticles || {};
-    
-    if (Object.keys(groupedArticles).length === 0) {
-      synopsisContent.innerHTML = 'No significant articles found. Try running debug from the popup.';
-    } else {
-      synopsisContent.innerHTML = '';
+  synopsisContent.innerHTML = '';
 
-      // Flatten and sort articles
-      const sortedArticles = Object.entries(groupedArticles)
-        .flatMap(([date, articles]) => 
-          articles.map(article => ({...article, date}))
-        )
-        .sort((a, b) => new Date(b.lastVisit) - new Date(a.lastVisit));
+  const articlesToDisplay = allArticles.slice(displayedArticles, displayedArticles + articlesPerPage);
+  displayedArticles += articlesToDisplay.length;
 
-      let currentDate = null;
+  let currentDate = null;
 
-      sortedArticles.forEach(function(article) {
-        if (article.date !== currentDate) {
-          currentDate = article.date;
-          const dateHeader = document.createElement('h2');
-          dateHeader.textContent = currentDate;
-          dateHeader.className = 'mt-4 mb-3';
-          synopsisContent.appendChild(dateHeader);
-        }
-
-        const articleDiv = document.createElement('div');
-        articleDiv.className = 'row article-row';
-        articleDiv.innerHTML = `
-          <div class="col-md-6">
-            <h3>
-              <a href="${article.url}" target="_blank">${article.title}</a> 
-              <small class="text-muted">(${article.domain})</small>
-            </h3>
-            <p>${article.timeSpent}</p>
-          </div>
-          <div class="col-md-6">
-            <textarea id="synopsis-${article.url}" class="form-control" rows="4" placeholder="Write your synopsis here..."></textarea>
-          </div>
-        `;
-        synopsisContent.appendChild(articleDiv);
-
-        const textarea = articleDiv.querySelector('textarea');
-        textarea.addEventListener('input', () => saveSynopsis(article.url, textarea.value));
-        loadSynopsis(article.url, textarea);
-      });
+  articlesToDisplay.forEach(function(article) {
+    if (article.date !== currentDate) {
+      currentDate = article.date;
+      const dateHeader = document.createElement('h2');
+      dateHeader.textContent = currentDate;
+      dateHeader.className = 'mt-4 mb-3';
+      synopsisContent.appendChild(dateHeader);
     }
+
+    const articleDiv = document.createElement('div');
+    articleDiv.className = 'row article-row align-items-center';
+    articleDiv.innerHTML = `
+      <div class="col-md-6">
+        <h3>
+          <a href="${article.url}" target="_blank">${article.title}</a>
+        </h3>
+        <p class="mb-1"><small class="text-muted">${article.domain}</small></p>
+        <p class="mb-0"><span class="badge bg-secondary">${article.timeSpent}</span></p>
+      </div>
+      <div class="col-md-6">
+        <textarea id="synopsis-${article.url}" class="form-control" rows="3" placeholder="Write your synopsis here..."></textarea>
+      </div>
+    `;
+    synopsisContent.appendChild(articleDiv);
+
+    const textarea = articleDiv.querySelector('textarea');
+    textarea.addEventListener('input', () => saveSynopsis(article.url, textarea.value));
+    loadSynopsis(article.url, textarea);
   });
+
+  document.getElementById('loadMoreBtn').classList.toggle('d-none', displayedArticles >= allArticles.length);
+}
+
+function loadMoreArticles() {
+  displaySynopsis();
 }
 
 function saveSynopsis(url, synopsis) {
   chrome.storage.local.set({[`synopsis_${url}`]: synopsis}, () => {
     console.log('Synopsis saved');
+    updateRecapCount();
   });
 }
 
@@ -67,6 +104,13 @@ function loadSynopsis(url, textarea) {
     if (result[`synopsis_${url}`]) {
       textarea.value = result[`synopsis_${url}`];
     }
+  });
+}
+
+function updateRecapCount() {
+  chrome.storage.local.get(null, (result) => {
+    const recapCount = Object.keys(result).filter(key => key.startsWith('synopsis_') && result[key].trim() !== '').length;
+    document.getElementById('recapCount').textContent = `Recaps added: ${recapCount}`;
   });
 }
 

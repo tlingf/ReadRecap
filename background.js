@@ -43,7 +43,45 @@ async function analyzeHistory() {
     }
   }
 
-  async function processHistoryItems(historyItems) {
+  chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+    if (request.action === "getFilteredArticles") {
+      getFilteredArticles(request.minTime, request.startDate, request.endDate)
+        .then(response => sendResponse(response));
+      return true;  // Indicates that the response is sent asynchronously
+    }
+    // ... (handle other message types) ...
+  });
+  
+  async function getFilteredArticles(minTime, startDate, endDate) {
+    try {
+      const historyItems = await chrome.history.search({
+        text: '',
+        startTime: startDate,
+        endTime: endDate,
+        maxResults: 1000
+      });
+  
+      console.log(`Found ${historyItems.length} history items.`);
+      const significantArticles = await processHistoryItems(historyItems, minTime);
+  
+      // Group articles by date
+      const groupedArticles = groupArticlesByDate(significantArticles);
+  
+      const stats = {
+        articleCount: significantArticles.length,
+        startDate: startDate,
+        endDate: endDate,
+        recapCount: await getRecapCount()
+      };
+  
+      return { articles: significantArticles, stats: stats };
+    } catch (error) {
+      console.error("Error during filtered history analysis:", error);
+      return { articles: [], stats: { articleCount: 0, startDate, endDate, recapCount: 0 } };
+    }
+  }
+  
+  async function processHistoryItems(historyItems, minTime) {
     const significantArticles = [];
     const seenUrls = new Set();
   
@@ -69,6 +107,15 @@ async function analyzeHistory() {
     }
 
   return significantArticles;
+}
+
+async function getRecapCount() {
+  return new Promise((resolve) => {
+    chrome.storage.local.get(null, (result) => {
+      const recapCount = Object.keys(result).filter(key => key.startsWith('synopsis_') && result[key].trim() !== '').length;
+      resolve(recapCount);
+    });
+  });
 }
 
 function groupArticlesByDate(articles) {
