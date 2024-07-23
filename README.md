@@ -8,7 +8,7 @@ This tries to filter to articles, blogs, and podcasts (also showing github pages
 To run:
 - Go to chrome://extensions/
 - Turn on Developer mode on the right
-- Go to "Load unpacked" and select the the ReadRecap directory
+- Go to "Load unpacked" and select the this directory
 
 Notes:
 - So far, all this is stored in Chrome local storage, so it can't store too much yet.
