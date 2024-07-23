@@ -36,7 +36,7 @@ function loadAndDisplaySynopsis() {
   }, function(response) {
     allArticles = response.articles;
     updateStats(response.stats);
-    displaySynopsis();
+    displaySynopsis(true);
   });
 }
 
@@ -46,23 +46,45 @@ function updateStats(stats) {
   document.getElementById('recapCount').textContent = `Recaps written: ${stats.recapCount}`;
 }
 
-function displaySynopsis() {
+function displaySynopsis(clearExisting = false) {
   const synopsisContent = document.getElementById('synopsisContent');
+  if (clearExisting) {
+    synopsisContent.innerHTML = '';
+    displayedArticles = 0;
+  }
+  
   const articlesToDisplay = allArticles.slice(displayedArticles, displayedArticles + articlesPerPage);
   displayedArticles += articlesToDisplay.length;
 
+  let currentMonth = null;
+  const seenUrls = new Set();
+
   articlesToDisplay.forEach(function(article) {
+    if (seenUrls.has(article.url)) {
+      return; // Skip duplicate URLs
+    }
+    seenUrls.add(article.url);
+
+    const articleDate = new Date(article.lastVisit);
+    const articleMonth = articleDate.toLocaleString('default', { month: 'long', year: 'numeric' });
+
+    if (articleMonth !== currentMonth) {
+      currentMonth = articleMonth;
+      const monthHeader = document.createElement('h2');
+      monthHeader.textContent = currentMonth;
+      monthHeader.className = 'month-header';
+      synopsisContent.appendChild(monthHeader);
+    }
+
     const articleDiv = document.createElement('div');
     articleDiv.className = 'row article-row align-items-center';
     articleDiv.innerHTML = `
       <div class="col-md-6">
-        <h3>
           <a href="${article.url}" target="_blank">${article.title}</a>
-        </h3>
         <p class="mb-1"><small class="text-muted">${article.domain}</small></p>
         <p class="mb-0">
           <span class="badge bg-secondary">${article.timeSpent}</span>
-          <small class="text-muted ml-2">Last read: ${new Date(article.lastVisit).toLocaleString()}</small>
+          <small class="text-muted ml-2">Last read: ${articleDate.toLocaleString()}</small>
         </p>
       </div>
       <div class="col-md-6">
@@ -80,7 +102,7 @@ function displaySynopsis() {
 }
 
 function loadMoreArticles() {
-  displaySynopsis();
+  displaySynopsis(false);
 }
 
 function saveSynopsis(url, synopsis) {

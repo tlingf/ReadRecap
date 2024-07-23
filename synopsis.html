@@ -11,18 +11,30 @@
       font-family: 'Roboto', sans-serif;
       background-color: #f8f9fa;
       color: #333;
+      padding-top: 180px; /* Reduced from 230px */
+      font-size: 1rem;
     }
     h1 {
-      font-size: 2.5rem;
+      font-size: 2rem;
       font-weight: 700;
       color: #2c3e50;
-      margin-bottom: 1.5rem;
+      margin-bottom: 0.5rem;
+    }
+    #fixedHeader {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background-color: #f8f9fa;
+      z-index: 1000;
+      padding: 10px 20px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
     #statsContainer {
       background-color: #e8f4f8;
       border-radius: 8px;
-      padding: 1rem;
-      margin-bottom: 1rem;
+      padding: 0.5rem;
+      margin-bottom: 0.5rem;
     }
     .article-row {
       background-color: #ffffff;
@@ -47,49 +59,60 @@
       border-color: #3498db;
       box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
     }
+    .month-header {
+      background-color: #3498db;
+      color: white;
+      padding: 0.5rem;
+      border-radius: 4px;
+      margin-top: 1rem;
+      margin-bottom: 1rem;
+    }
+    #exportButton {
+      position: absolute;
+      top: 10px;
+      right: 20px;
+    }
   </style>
 </head>
-<body class="container-fluid py-4">
-  <h1>Recap your Reads</h1>
-  <div id="statsContainer" class="mb-4">
-    <div class="row mb-3">
-      <div class="col-md-4">
-        <span id="articleCount">Articles found: Loading...</span>
+<body>
+  <div id="fixedHeader">
+    <h1>Recap your Reads</h1>
+    <button id="exportButton" class="btn btn-secondary btn-sm">Export Data</button>
+    <div id="statsContainer" class="mb-2">
+      <div class="row mb-2">
+        <div class="col-md-4">
+          <span id="articleCount">Articles found: Loading...</span>
+        </div>
+        <div class="col-md-4">
+          <span id="recapCount">Recaps written: Loading...</span>
+        </div>
+        <div class="col-md-4">
+          <span id="timePeriod">Time period: Loading...</span>
+        </div>
       </div>
-      <div class="col-md-4">
-        <span id="recapCount">Recaps written: Loading...</span>
+      <div class="row">
+        <div class="col-md-3">
+          <label for="minTimeInput" class="form-label">Min time (minutes):</label>
+          <input type="number" id="minTimeInput" class="form-control form-control-sm" value="3" min="1">
+        </div>
+        <div class="col-md-3">
+          <label for="startDate" class="form-label">Start Date:</label>
+          <input type="date" id="startDate" class="form-control form-control-sm">
+        </div>
+        <div class="col-md-3">
+          <label for="endDate" class="form-label">End Date:</label>
+          <input type="date" id="endDate" class="form-control form-control-sm">
+        </div>
+        <div class="col-md-3 d-flex align-items-end">
+          <button id="applyFilters" class="btn btn-primary btn-sm">Apply Filters</button>
+        </div>
       </div>
-      <div class="col-md-4">
-        <span id="timePeriod">Time period: Loading...</span>
-      </div>
-    </div>
-    <div class="row mb-3">
-      <div class="col-md-3">
-        <label for="minTimeInput" class="form-label">Min time (minutes):</label>
-        <input type="number" id="minTimeInput" class="form-control" value="3" min="1">
-      </div>
-      <div class="col-md-3">
-        <label for="startDate" class="form-label">Start Date:</label>
-        <input type="date" id="startDate" class="form-control">
-      </div>
-      <div class="col-md-3">
-        <label for="endDate" class="form-label">End Date:</label>
-        <input type="date" id="endDate" class="form-control">
-      </div>
-      <div class="col-md-3 d-flex align-items-end">
-        <button id="applyFilters" class="btn btn-primary">Apply Filters</button>
-      </div>
-    </div>
-  </div>
-  <div class="row mb-3">
-    <div class="col-md-4">
-      <button id="exportButton" class="btn btn-secondary">Export Data</button>
-    </div>
-    <div class="col-md-4">
-      <button id="loadMoreBtn" class="btn btn-primary">Load More</button>
     </div>
   </div>
-  <div id="synopsisContent" class="mt-4">Loading...</div>
+  <div id="synopsisContent" class="mt-4 container-fluid">Loading...</div>
+  <div class="text-center mt-3 mb-5">
+    <button id="loadMoreBtn" class="btn btn-primary">Load More</button>
+  </div>
   <script src="synopsis.js"></script>
 </body>
 </html>
